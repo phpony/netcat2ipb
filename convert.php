@@ -109,7 +109,7 @@ $ending = <<<CLI
 --------------------------------------------------------------
 The conversation is done. Now you need to log into your:
  ACP > Tools & Settings > Recount & Rebuild
-and rebuild foroms, topics, members and PM's stats.
+and rebuild forums, topics, members and PM's stats.
 
 Good luck!
 --------------------------------------------------------------
