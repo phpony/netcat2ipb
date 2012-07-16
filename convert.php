@@ -339,7 +339,7 @@ class ipb {
 			'last_real_post' => strtotime($topic['LastUpdated']),
 			'poll_state' => 0,
 			'last_vote' => 0,
-			'views' => 0,
+			'views' => intval($topic['Views']),
 			'author_mode' => 1,
 		);
 		foreach($_insert as $k=>$v) {
