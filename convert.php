@@ -330,7 +330,7 @@ class ipb {
 			'starter_name' => $member['members_display_name'],
 			'approved' => 1,
 			'posts' => 0,
-			'pinned' => 0,
+			'pinned' => ($optic['Priority'] > 0) ? 1 : 0,
 			'start_date' => strtotime($topic['Created']),
 			'forum_id' => $this->existing['forums'][$topic['Subdivision_ID']],
 			'last_real_post' => strtotime($topic['LastUpdated']),
