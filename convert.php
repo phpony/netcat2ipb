@@ -166,7 +166,7 @@ class io {
 		$this->say($word.": ", false);
 		$input = trim(fgets(STDIN));
 		if ( $bool ) {
-			return (mb_strtolower($input) == 'y' || empty($input));
+			return (strtolower($input) == 'y' || empty($input));
 		} else {
 			return $input;
 		}
@@ -278,8 +278,8 @@ class ipb {
 			'last_visit' => strtotime($member['LastUpdated']),
 			'last_activity' => strtotime($member['LastUpdated']),
 			'members_display_name' => $member['ForumName'],
-			'members_l_display_name' => mb_strtolower($member['ForumName']),
-			'members_l_username' => mb_strtolower($member['Login']),
+			'members_l_display_name' => strtolower($member['ForumName']),
+			'members_l_username' => strtolower($member['Login']),
 			'members_pass_salt' => 'nWg+e',
 			'members_pass_hash' => md5($member['Password'].md5('nWg+e')),
 		);
