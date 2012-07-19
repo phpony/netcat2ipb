@@ -262,14 +262,11 @@ class ipb {
 	public function add_member($member) {
 		if ( array_key_exists( $member['User_ID'], $this->existing['members'] ) ) return;
 		if(empty($member['Password'])) $member['Password'] = md5(uniqid().$member['User_ID']);
-		$member['ForumName'] = $member['Login']; 
-		/*
-		if(empty($member['ForumName'])) $member['ForumName'] = $member['Login'];
-		$is_member = $this->db->query_and_fetch("SELECT * FROM {$this->prefix}members WHERE members_display_name = '{$member['ForumName']}'");
+		$is_member = $this->db->query_and_fetch("SELECT * FROM {$this->prefix}members WHERE name = '{$member['Login']}'");
 		if(!empty($is_member)) {
-			$member['ForumName'] = $member['ForumName'] . uniqid();
+			$member['Login'] = $member['Login'] . '_' . uniqid();
 		}
-		*/
+		$member['ForumName'] = $member['Login']; 
 		$_insert = array(
 			'name' => $member['Login'],
 			'member_group_id' => 3,
