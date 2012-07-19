@@ -258,6 +258,8 @@ class ipb {
 		$code = str_ireplace("[quote=", "[quote name=", $code);
 		$code = str_ireplace("[color=", "[color=#", $code);		
 		$code = preg_replace("/\[img='([^']*)'\]/si", "[img]$1[/img]", $code);
+                $smiles = array ( ";)" => ":grin:", ":lol:" => ":laugh:", "-_-" => ":proud:", ";)" => ":yes:", ";)" => ":wink:", "B)" => ":cool:", ":rolleyes:" => ":eyes:", ":huh:" => ":lookdown:", ":unsure:" => ":spy:", ":angry:" => ":bad:", ":mellow:" => ":stern:", ":wub:" => ":kiss:", "<_<" => ":think:", "^_^" => ":yep:", "^_^" => ":sick:", ":wacko:" => ":no:", ":blink:" => ":cantlook:", ":wacko:" => ":doh:", ":o" => ":out:", ":blink:" => ":eyeup:", ":ph34r:" => ":shh:", ":angry:" => ":evil:", ":(" => ":upset:", ":unsure:" => ":undecided:", ":(" => ":cry:" );
+                $code = str_ireplace( $smiles, array_keys($smiles), $code);
 		return $code;
 	}
 	public function add_member($member) {
