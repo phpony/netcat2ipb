@@ -105,6 +105,8 @@ while ( $pm = $netcat->get_pms() ) {
 	$i++;
 }
 
+$ipb->finalize();
+
 $ending = <<<CLI
 --------------------------------------------------------------
 The conversation is done. Now you need to log into your:
@@ -431,6 +433,11 @@ class ipb {
 		$this->db->query("INSERT INTO `message_topic_user_map` (`map_user_id`, `map_topic_id`, `map_folder_id`, `map_read_time`, `map_user_active`, `map_user_banned`, `map_has_unread`, `map_is_system`, `map_is_starter`, `map_left_time`, `map_ignore_notification`, `map_last_topic_reply`) VALUES ({$mid}, {$topic_id}, 'myconvo', 0, 1, 0, 1, 0, 1, 0, 0, {$lt}), ({$toid}, {$topic_id}, 'myconvo', 1342419007, 1, 0, 0, 0, 0, 0, 0, {$lt})");
 		$this->db->query("INSERT INTO {$this->prefix}netcat_map (type, old_id, new_id) VALUES ('pms', {$pm['Message_ID']}, {$topic_id})");
 		$this->existing['pms'][$pm['Message_ID']] = $topic_id;
+	}
+	public function finalize() {
+		$this->io->say("Finalizing...");
+		$this->db->query("UPDATE {$this->prefix}members SET `members_l_display_name` = LOWER(`members_display_name`), `members_l_username` = LOWER(`name`)");
+		$this->io->say("Done!");
 	}
 }
 
