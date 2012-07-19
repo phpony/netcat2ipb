@@ -437,6 +437,7 @@ class ipb {
 	public function finalize() {
 		$this->io->say("Finalizing...");
 		$this->db->query("UPDATE {$this->prefix}members SET `members_l_display_name` = LOWER(`members_display_name`), `members_l_username` = LOWER(`name`)");
+		$this->db->query("UPDATE {$this->prefix}posts SET use_sig = 1, use_emo = 1");
 		$this->io->say("Done!");
 	}
 }
