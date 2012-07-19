@@ -255,7 +255,8 @@ class ipb {
 	public function parse_post($code) {
 		$code = str_replace("\r", "", $code);
 		$code = str_replace("\n", "<br />", $code);
-		$code = str_replace("[quote=", "[quote name=", $code);
+		$code = str_ireplace("[quote=", "[quote name=", $code);
+		$code = str_ireplace("[color=", "[color=#", $code);		
 		$code = preg_replace("/\[img='([^']*)'\]/si", "[img]$1[/img]", $code);
 		return $code;
 	}
