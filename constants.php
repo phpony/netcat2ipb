@@ -43,7 +43,7 @@ class netcat {
 		$u = explode("/", $_SERVER['REQUEST_URI']);
 		if ( empty($u[2]) || empty($u[1]) ) return;
 		$furl = $this->safe("/".$u[1]."/".$u[2]."/");
-		$this->query("SELECT * FROM {$this->prefix}netcat_map WHERE app = 'forums' AND furl = {$furl}", $this->conn);
+		$this->query("SELECT * FROM {$this->prefix}netcat_redirects WHERE app = 'forums' AND furl = '{$furl}'", $this->conn);
 		if($row = $this->fetch()) {
 			$this->redirect("index.php?showforum=".$row['new_id']);
 		}	
