@@ -48,6 +48,10 @@ if ( ! $io->ask("All necessary data is collected. Proceed with conversion (Y/n)?
 }
 $io->say("Converting");
 
+$io->say("Importing old NetCat redirects...");
+$ipb->add_oldies($netcat->get_oldies());	
+$io->say("Done!");
+
 $io->say("");
 $io->say("Converting {$netcat->info['members']} NetCat members:");
 $io->scale();
@@ -250,7 +254,9 @@ class ipb {
 			$this->db->query("DROP TABLE IF EXISTS `{$this->prefix}netcat_map`");
 			$this->db->query("CREATE TABLE `{$this->prefix}netcat_map` (`id` int(11) NOT NULL AUTO_INCREMENT, `type` varchar(255) NOT NULL, `old_id` int(11) NOT NULL, `new_id` int(11) NOT NULL, PRIMARY KEY (`id`), KEY `type` (`type`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
 			$this->db->query("DROP TABLE IF EXISTS `{$this->prefix}netcat_redirects`");
-			$this->db->query("CREATE TABLE `netcat_redirects` ( `id` int(11) NOT NULL AUTO_INCREMENT, `app` varchar(255) NOT NULL, `furl` varchar(255) NOT NULL, `new_id` int(11) NOT NULL, PRIMARY KEY (`id`), KEY `app` (`app`), KEY `furl` (`furl`)) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+			$this->db->query("CREATE TABLE `{$this->prefix}netcat_redirects` ( `id` int(11) NOT NULL AUTO_INCREMENT, `app` varchar(255) NOT NULL, `furl` varchar(255) NOT NULL, `new_id` int(11) NOT NULL, PRIMARY KEY (`id`), KEY `app` (`app`), KEY `furl` (`furl`)) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+			$this->db->query("DROP TABLE IF EXISTS `{$this->prefix}netcat_oldies`");
+			$this->db->query("CREATE TABLE `{$this->prefix}netcat_oldies` (`id` int(11) NOT NULL AUTO_INCREMENT, `type` varchar(255) NOT NULL, `old_id` int(11) NOT NULL, `new_id` int(11) NOT NULL, PRIMARY KEY (`id`), KEY `type` (`type`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
 			$this->io->say("Created temporary tables!");
 		}
 	}
@@ -260,9 +266,18 @@ class ipb {
 		$code = str_ireplace("[quote=", "[quote name=", $code);
 		$code = str_ireplace("[color=", "[color=#", $code);		
 		$code = preg_replace("/\[img='([^']*)'\]/si", "[img]$1[/img]", $code);
-                $smiles = array ( ";)" => ":grin:", ":lol:" => ":laugh:", "-_-" => ":proud:", ";)" => ":yes:", ";)" => ":wink:", "B)" => ":cool:", ":rolleyes:" => ":eyes:", ":huh:" => ":lookdown:", ":unsure:" => ":spy:", ":angry:" => ":bad:", ":mellow:" => ":stern:", ":wub:" => ":kiss:", "<_<" => ":think:", "^_^" => ":yep:", "^_^" => ":sick:", ":wacko:" => ":no:", ":blink:" => ":cantlook:", ":wacko:" => ":doh:", ":o" => ":out:", ":blink:" => ":eyeup:", ":ph34r:" => ":shh:", ":angry:" => ":evil:", ":(" => ":upset:", ":unsure:" => ":undecided:", ":(" => ":cry:" );
-                $code = str_ireplace( $smiles, array_keys($smiles), $code);
+		$sm_old = array ( 0 => ':wink:', 1 => ':laugh:', 2 => ':proud:', 3 => ':cool:', 4 => ':eyes:', 5 => ':lookdown:', 6 => ':undecided:', 7 => ':evil:', 8 => ':stern:', 9 => ':kiss:', 10 => ':think:', 11 => ':sick:', 12 => ':doh:', 13 => ':eyeup:', 14 => ':out:', 15 => ':shh:', 16 => ':cry:' );
+		$sm_new = array ( 0 => ';)', 1 => ':lol:', 2 => '-_-', 3 => 'B)', 4 => ':rolleyes:', 5 => ':huh:', 6 => ':unsure:', 7 => ':angry:', 8 => ':mellow:', 9 => ':wub:', 10 => '<_<', 11 => '^_^', 12 => ':wacko:', 13 => ':blink:', 14 => ':o', 15 => ':ph34r:', 16 => ':(' );
+ 		$code = str_replace( $sm_old, $sm_new, $code);
 		return $code;
+	}
+	public function add_oldies($data) {
+		foreach ( $data as $type => $_data ) {
+			foreach ( $_data as $old_id => $new_id ) {
+				if ( !empty($old_id) && !empty($new_id) )
+				$this->db->query("INSERT INTO {$this->prefix}netcat_oldies (type, old_id, new_id) VALUES ('{$type}', {$old_id}, {$new_id})");
+			}			
+		}
 	}
 	public function add_member($member) {
 		if ( array_key_exists( $member['User_ID'], $this->existing['members'] ) ) return;
@@ -466,11 +481,12 @@ class netcat {
 		}		
 	}
 	public function analyse() {
-		$this->redirects = array();
+		$this->redirects = array( 'sub'=>array(), 'topic'=>array() );
 		$result = $this->db->query("SELECT * FROM {$this->tables['aliases']}");
 		$i = 0;
 		while($row = $this->db->fetch()) {
-			$this->redirects[$row['old_sub']] = $row['new_sub'];
+			$this->redirects['sub'][$row['old_sub']] = $row['new_sub'];
+			$this->redirects['topic'][$row['old_topic']] = $row['new_topic'];
 			$i++;
 		}
 		$this->io->say("Loaded {$i} aliases!");	
@@ -479,6 +495,9 @@ class netcat {
 		$this->info['topics'] = $this->db->count($this->tables['topics']);
 		$this->info['posts'] = $this->db->count($this->tables['posts']);
 		$this->info['pms'] = $this->db->count($this->tables['personal messages']);		
+	}
+	public function get_oldies() {
+		return $this->redirects;
 	}
 	private $res_members;
 	public function get_member() {
