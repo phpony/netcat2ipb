@@ -29,14 +29,14 @@ class netcat {
 		$id = intval($id);
 		$this->query("SELECT * FROM {$this->prefix}netcat_oldies WHERE type = 'topic' AND old_id = {$id}", $this->conn);
 		if($row = $this->fetch()) {
-			$this->redirect("index.php?showtopic=".$row['new_id'].'&st='.$st);
+			$this->topic($row['new_id'], $st);
 		}	
 	}
 	function old_forum($id) {
 		$id = intval($id);
 		$this->query("SELECT * FROM {$this->prefix}netcat_oldies WHERE type = 'sub' AND old_id = {$id}", $this->conn);
 		if($row = $this->fetch()) {
-			$this->redirect("index.php?showforum=".$row['new_id']);
+			$this->forum($row['new_id'], $st);
 		}	
 	}
 	function topic($id, $st) {
@@ -53,7 +53,14 @@ class netcat {
 			$this->redirect("index.php?showuser=".$row['new_id']);
 		}	
 	}
-	function forum() {
+	function forum($id) {
+		$id = intval($id);
+		$this->query("SELECT * FROM {$this->prefix}netcat_map WHERE type = 'forums' AND old_id = {$id}", $this->conn);
+		if($row = $this->fetch()) {
+			$this->redirect("index.php?showforum=".$row['new_id'].'&st='.$st);
+		}	
+	}
+	function forum_furls() {
 		$u = explode("/", $_SERVER['REQUEST_URI']);
 		if ( empty($u[2]) || empty($u[1]) ) return;
 		$furl = $this->safe("/".$u[1]."/".$u[2]."/");
@@ -81,8 +88,8 @@ if(substr($_SERVER['REQUEST_URI'],0,3)=='/f/') {
 			if ( !empty($_GET['Topic_ID']) ) {
 				$netcat->old_topic($_GET['Topic_ID'], $st);
 			}
-			if ( !empty($_GET['Sub_ID']) ) {
-				$netcat->old_forum($_GET['Sub_ID']);
+			if ( !empty($_GET['Subdiv_ID']) ) {
+				$netcat->old_forum($_GET['Subdiv_ID']);
 			}
 			if ( preg_match("/topic_([0-9]{1,10})\./iu", $_SERVER['REQUEST_URI'], $match) ) {
 				$netcat->topic($match[1], $st);
@@ -90,7 +97,7 @@ if(substr($_SERVER['REQUEST_URI'],0,3)=='/f/') {
 			if ( preg_match("/profile_([0-9]{1,10})\./iu", $_SERVER['REQUEST_URI'], $match) ) {
 				$netcat->member($match[1]);
 			}
-			$netcat->forum();
+			$netcat->forum_furls();
 	}
 	$netcat->adios();
 	unset($netcat);
