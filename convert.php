@@ -479,7 +479,7 @@ class netcat {
 		}		
 	}
 	public function analyse() {
-		$this->redirects = array( 'sub'=>array(), 'topic'=>array() );
+		$this->redirects = array();
 		$result = $this->db->query("SELECT * FROM {$this->tables['aliases']}");
 		$i = 0;
 		while($row = $this->db->fetch()) {
