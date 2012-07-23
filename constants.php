@@ -25,18 +25,18 @@ class netcat {
     function safe($string) {
         return mysql_real_escape_string($string, $this->conn);
     }
-	function old_topic($id, $st) {
-		$id = intval($id);
-		$this->query("SELECT * FROM {$this->prefix}netcat_oldies WHERE type = 'topic' AND old_id = {$id}", $this->conn);
+	function old_topic($id, $sub_id, $st) {
+		$id = intval($id); $sub_id = intval($sub_id);
+		$this->query("SELECT * FROM {$this->prefix}netcat_oldies WHERE old_topic = {$id} AND old_sub = {$sub_id}", $this->conn);
 		if($row = $this->fetch()) {
-			$this->topic($row['new_id'], $st);
+			$this->topic($row['new_topic'], $st);
 		}	
 	}
 	function old_forum($id) {
 		$id = intval($id);
-		$this->query("SELECT * FROM {$this->prefix}netcat_oldies WHERE type = 'sub' AND old_id = {$id}", $this->conn);
+		$this->query("SELECT * FROM {$this->prefix}netcat_oldies WHERE old_topic = 0, old_sub = {$id}", $this->conn);
 		if($row = $this->fetch()) {
-			$this->forum($row['new_id'], $st);
+			$this->forum($row['new_sub'], $st);
 		}	
 	}
 	function topic($id, $st) {
@@ -85,8 +85,8 @@ if(substr($_SERVER['REQUEST_URI'],0,3)=='/f/') {
 	if ( $netcat->ok ) {
 			$st = !empty($_GET['Page_NUM']) ? intval($_GET['curPos'])*20 : 0;
 			$st = !empty($_GET['curPos']) ? intval($_GET['curPos']) : $st;
-			if ( !empty($_GET['Topic_ID']) ) {
-				$netcat->old_topic($_GET['Topic_ID'], $st);
+			if ( !empty($_GET['Topic_ID']) && !empty($_GET['Subdiv_ID']) ) {
+				$netcat->old_topic($_GET['Topic_ID'], $_GET['Subdiv_ID'], $st);
 			}
 			if ( !empty($_GET['Subdiv_ID']) ) {
 				$netcat->old_forum($_GET['Subdiv_ID']);
