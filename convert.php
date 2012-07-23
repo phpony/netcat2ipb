@@ -248,6 +248,7 @@ class ipb {
 			} elseif ( $this->io->ask('Would you like to drop them (Y/n)?', true) ) {
 				$this->db->query("TRUNCATE TABLE {$this->prefix}netcat_map");
 				$this->db->query("TRUNCATE TABLE {$this->prefix}netcat_redirects");
+				$this->db->query("TRUNCATE TABLE {$this->prefix}netcat_oldies");
 				$this->io->say("Truncated tables!");
 			}
 		} else {
@@ -256,7 +257,7 @@ class ipb {
 			$this->db->query("DROP TABLE IF EXISTS `{$this->prefix}netcat_redirects`");
 			$this->db->query("CREATE TABLE `{$this->prefix}netcat_redirects` ( `id` int(11) NOT NULL AUTO_INCREMENT, `app` varchar(255) NOT NULL, `furl` varchar(255) NOT NULL, `new_id` int(11) NOT NULL, PRIMARY KEY (`id`), KEY `app` (`app`), KEY `furl` (`furl`)) ENGINE=MyISAM DEFAULT CHARSET=utf8");
 			$this->db->query("DROP TABLE IF EXISTS `{$this->prefix}netcat_oldies`");
-			$this->db->query("CREATE TABLE `{$this->prefix}netcat_oldies` (`id` int(11) NOT NULL AUTO_INCREMENT, `type` varchar(255) NOT NULL, `old_id` int(11) NOT NULL, `new_id` int(11) NOT NULL, PRIMARY KEY (`id`), KEY `type` (`type`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+			$this->db->query("CREATE TABLE IF NOT EXISTS `netcat_oldies` ( `id` int(11) NOT NULL AUTO_INCREMENT, `old_topic` int(11) NOT NULL, `old_sub` int(11) NOT NULL, `new_sub` int(11) NOT NULL, `new_topic` int(11) NOT NULL, PRIMARY KEY (`id`) ) ENGINE=MyISAM  DEFAULT CHARSET=utf8");
 			$this->io->say("Created temporary tables!");
 		}
 	}
@@ -272,11 +273,8 @@ class ipb {
 		return $code;
 	}
 	public function add_oldies($data) {
-		foreach ( $data as $type => $_data ) {
-			foreach ( $_data as $old_id => $new_id ) {
-				if ( !empty($old_id) && !empty($new_id) )
-				$this->db->query("INSERT INTO {$this->prefix}netcat_oldies (type, old_id, new_id) VALUES ('{$type}', {$old_id}, {$new_id})");
-			}			
+		foreach ( $data as $row ) {
+			$this->db->query("INSERT INTO {$this->prefix}netcat_oldies (`old_topic`, `old_sub`, `new_sub`, `new_topic`) VALUES ({$row['old_topic']}, {$row['old_sub']}, {$row['new_sub']}, {$row['new_topic']})");
 		}
 	}
 	public function add_member($member) {
@@ -485,8 +483,12 @@ class netcat {
 		$result = $this->db->query("SELECT * FROM {$this->tables['aliases']}");
 		$i = 0;
 		while($row = $this->db->fetch()) {
-			$this->redirects['sub'][$row['old_sub']] = $row['new_sub'];
-			$this->redirects['topic'][$row['old_topic']] = $row['new_topic'];
+			$this->redirects[] = array(
+				'old_sub' => $row['old_sub'],
+				'old_topic' => $row['old_topic'],
+				'new_sub' => $row['new_sub'],
+				'new_topic' => $row['new_topic']
+			);
 			$i++;
 		}
 		$this->io->say("Loaded {$i} aliases!");	
